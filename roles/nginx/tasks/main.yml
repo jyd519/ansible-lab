@@ -1,0 +1,27 @@
+---
+
+- import_tasks: check.yml
+  tags: "check_nginx"
+
+# Install nginx.
+- name: test
+  debug:
+    var: ansible_limit
+
+- name: update apt cache
+  apt: name=nginx update_cache=yes
+
+- name: Install Nginx
+  apt: name=nginx state=present
+
+# - name: turn server_tokens off
+#   # 移除 server_tokens 前的 '#' 字元。
+#   lineinfile: >
+#     dest=/etc/nginx/nginx.conf
+#     regexp="server_tokens off;"
+#     insertafter="# server_tokens off;"
+#     line="server_tokens off;"
+#     state=present
+#   notify: restart nginx
+
+# vim:ft=yaml.ansible :

@@ -1,0 +1,16 @@
+- name: check nginx process
+  shell:
+    cmd: "ps -A | grep 'nginx'"
+  register: nginx_process
+  changed_when: no
+
+- name: review http state
+  command: "curl -s http://localhost"
+  register: http_state
+  changed_when: no
+
+- name: print nginx process
+  debug: msg={{ nginx_process.stdout_lines }}
+
+- name: print http state
+  debug: msg={{ http_state.stdout_lines }}

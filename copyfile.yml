@@ -1,0 +1,34 @@
+r name: copy files
+  hosts: test 
+  become: True
+  tasks:
+    # - name: Copy all yaml files
+    #   copy:
+    #     src: "{{ item }}"
+    #     dest: "~/ansiblelab/"  # 结尾的/确保文件复制到目录中
+    #   with_fileglob:
+    #     - "*.yml"
+
+    - synchronize:
+        src: ./
+        dest: ~/ansiblelab2/
+        rsync_opts:
+          - '--exclude=.git'
+
+    # - name: Install nginx
+    #   package: name=nginx update_cache=yes
+    # - name: Copy nginx config file
+    #   copy:
+    #     src: nginx.conf
+    #     dest: /etc/nginx/sites-available/default
+    # - name: Enable configuration
+    #   file: >
+    #     dest=/etc/nginx/sites-enabled/default
+    #     src=/etc/nginx/sites-available/default
+    #     state=link
+    # - name: Copy index.html
+    #   template: >
+    #     src=index.html.j2
+    #     dest=/usr/share/nginx/html/index.html
+    # - name: Restart nginx
+    #   service: name=nginx state=restarted
