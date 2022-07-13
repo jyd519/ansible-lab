@@ -1,0 +1,22 @@
+---
+
+- name: Statistics CPU Memory Disk Utilization
+  hosts: all 
+  become: no
+  remote_user: "{{ user | default('root') }}"
+  gather_facts: no
+  tasks:
+    - name: "Statistics CPU Memory Disk Utilization..."
+      shell: |
+        free -m | awk 'NR==2{printf "Memory Usage: %s/%sMB (%.2f%%)\n", $3,$2,$3*100/$2 }'
+        df -h -t ext2 -t ext4 | grep -vE '^Filesystem|tmpfs|cdrom' | awk '{ print "Disk Usage:"" " $1 " " $3"/"$2" ""("$5")"}'
+        top -bn1 | grep load  | sed -n 's/^.*load average: \(.*\)$/CPU Load: \1/p'
+        ss -s | grep '[T]CP:'
+        lsof -nP -i4TCP -sTCP:ESTABLISHED | awk '{if (NR>1) {arr[$1]++} } END{ for (a in arr) printf " > %-15s %s\n", a, arr[a]}' | sort -nrk 3 
+      register: out
+      changed_when: no
+    - debug: var=out.stdout_lines
+
+
+
+# top -bn1 | grep load | awk '{printf "CPU Load: %.2f\n", $(NF-2)}'
