@@ -1,18 +1,14 @@
 ---
 
+- import_tasks: from_source.yml
+  when: nginx_install_from == "source"  
+
+- import_tasks: debian.yml
+  when: nginx_install_from == "repo"  
+
 - import_tasks: check.yml
-  tags: "check_nginx"
+  when: nginx_check | bool
 
-# Install nginx.
-- name: test
-  debug:
-    var: ansible_limit
-
-- name: update apt cache
-  apt: name=nginx update_cache=yes
-
-- name: Install Nginx
-  apt: name=nginx state=present
 
 # - name: turn server_tokens off
 #   # 移除 server_tokens 前的 '#' 字元。

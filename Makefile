@@ -4,4 +4,4 @@ test:
 	echo args = "$(ARGS)"
 
 vagrant:
-	   ansible-playbook -b -i ./inventory/vagrant.ini $(ARGS) ./playbook.yml
+	   ansible-playbook -i ./inventory/vagrant.ini $(ARGS) ./playbook.yml

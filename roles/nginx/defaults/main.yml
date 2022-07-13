@@ -1,0 +1,41 @@
+# source / repo
+nginx_install_from: "source"
+
+nginx_setup_vars: [
+  'install', 'uninstall', 'upgrade',
+]
+
+nginx_setup: "install" 
+nginx_default_setup: "install"
+
+nginx_state_vals:
+  install: present
+  uninstall: absent
+  upgrade: latest
+
+nginx_state: "{{ nginx_state_vals[nginx_setup] | default(nginx_state_vals[nginx_default_setup]) }}"
+
+nginx_install_source_pcre: yes
+nginx_install_source_zlib: yes
+nginx_install_source_openssl: yes
+
+nginx_static_modules:
+  - threads
+  - http_stub_status_module
+  - http_realip_module
+  - http_slice_module
+  # - http_ssl_module
+  # - http_v2_module
+  # - sub_mdoule 
+
+nginx_branch: stable
+
+pcre_release: 2
+pcre_version: pcre2-10.40
+zlib_version: zlib-1.2.12
+openssl_version: openssl-3.0.4
+
+nginx_check: no
+
+# start nginx service after provisioning
+nginx_start: yes 
