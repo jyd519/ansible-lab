@@ -1,0 +1,42 @@
+- name: Install SuperVisor 
+  hosts: all 
+  become: yes
+  vars:
+    nofile: 80000
+
+  tasks:
+    - name: Check if '-limit/-l' argument is provided
+      fail:
+        msg: "you must provides the -limit/-l argument to run this playbook"
+      when: ansible_limit is not defined
+
+    - name: Supervisor | Install package 
+      apt:
+        update_cache: yes
+        pkg:
+        - supervisor 
+         
+    - name: Supervisor | Edit nofile limit for
+      lineinfile:
+        path: /etc/supervisor/supervisord.conf
+        insertafter: '^\[supervisord\].*$'
+        regexp: '^minfds='
+        line: 'minfds={{nofile}}'
+        state: present
+      notify: Reload supervisor
+
+    - name: Supervisor | View nofile limits
+      shell: |
+          pgrep supervisord | while read line; do printf "supervisord $line: "; sudo prlimit -n -p "$line" | awk 'NR==2{printf "%s\n", $0}' ; done
+      register: out
+      tags: [view]
+      changed_when: no
+
+    - debug: var=out.stdout_lines
+      tags: [view]
+
+  handlers:
+    - name: Reload supervisor
+      command: systemctl restart supervisor
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:     

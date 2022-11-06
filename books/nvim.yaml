@@ -1,0 +1,9 @@
+---
+
+- name: install neovim
+  hosts: all
+
+  roles:
+    - { role: nvim, tags: ["nvim"], become: yes }
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

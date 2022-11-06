@@ -1,0 +1,27 @@
+- name: Config nvim
+  hosts: all 
+  
+  vars:
+    config_git_repo: https://github.com/jyd519/vimfiles.git
+    proxy_env:  # dict
+      http_proxy: http://172.16.21.17:1083
+      https_proxy: http://172.16.21.17:1083
+
+  environment:
+    G_ENV: TEST
+
+  tasks:
+    - name: Check if '-limit/-l' argument is provided
+      fail:
+        msg: "you must provides the -limit/-l argument to run this playbook"
+      when: ansible_limit is not defined
+
+    - name: clone git repo
+      become_user: "{{nvim_user}}"
+      environment: "{{ proxy_env }}"
+      ansible.builtin.git:
+        repo: "{{config_git_repo}}" 
+        dest: ~/.vimgit
+        version: lsp 
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:     

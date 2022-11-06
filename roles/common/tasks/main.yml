@@ -8,6 +8,4 @@
   when: ansible_os_family == "Debian"
 
 
-
-
 # vim:set et ft=yaml.ansible sw=2 ts=2:

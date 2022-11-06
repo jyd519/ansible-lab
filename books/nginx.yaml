@@ -1,0 +1,12 @@
+---
+
+- name: install nginx 
+  hosts: all
+
+  vars:
+    nginx_install_from: repo
+
+  roles:
+    - { role: nginx, tags: ["nginx"], become: yes }
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

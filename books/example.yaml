@@ -1,7 +1,11 @@
-r name: copy files
-  hosts: test 
-  become: True
+- name: multiple file copying methods
+  hosts: all 
   tasks:
+    - name: Check if '-limit/-l' argument is provided
+      fail:
+        msg: "you must provides the -limit/-l argument to run this playbook"
+      when: ansible_limit is not defined
+
     # - name: Copy all yaml files
     #   copy:
     #     src: "{{ item }}"
@@ -9,26 +13,21 @@ r name: copy files
     #   with_fileglob:
     #     - "*.yml"
 
-    - synchronize:
-        src: ./
-        dest: ~/ansiblelab2/
-        rsync_opts:
-          - '--exclude=.git'
+    # - synchronize:
+    #     src: ./roles
+    #     dest: "~/ansiblelab2/"
+    #     rsync_opts:
+    #       - '--exclude=.git'
 
-    # - name: Install nginx
-    #   package: name=nginx update_cache=yes
-    # - name: Copy nginx config file
-    #   copy:
-    #     src: nginx.conf
-    #     dest: /etc/nginx/sites-available/default
     # - name: Enable configuration
     #   file: >
     #     dest=/etc/nginx/sites-enabled/default
     #     src=/etc/nginx/sites-available/default
     #     state=link
+    
     # - name: Copy index.html
     #   template: >
     #     src=index.html.j2
     #     dest=/usr/share/nginx/html/index.html
-    # - name: Restart nginx
-    #   service: name=nginx state=restarted
+    
+# vim:set et sw=2 ts=2 ft=yaml.ansible:     

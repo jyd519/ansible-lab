@@ -1,0 +1,39 @@
+---
+
+- name: View/Edit nginx nofile limits
+  hosts: all 
+  vars:
+    nofile: 40000
+
+  tasks:
+    - name: Check if '-limit/-l' argument is provided
+      fail:
+        msg: "you must provides the -limit/-l argument to run this playbook"
+      when: ansible_limit is not defined
+
+    - name: Nginx | Edit nofile limit 
+      ansible.builtin.lineinfile:
+        path: /etc/nginx/nginx.conf
+        insertafter: '^worker_processes.*$'
+        regexp: '^worker_rlimit_nofile'
+        line: 'worker_rlimit_nofile {{nofile}};'
+        state: present 
+      tags: [edit, never]
+      notify: Nginx reload 
+
+    - name: Nginx | View nofile limits
+      shell:
+        cmd: |
+          pgrep nginx | while read line; do printf "$line "; sudo prlimit -n -p "$line" | awk 'NR==2{print}' ; done
+      register: out
+      tags: [view]
+      changed_when: no
+
+    - debug: var=out.stdout_lines
+      tags: [view]
+
+  handlers:
+    - name: Nginx reload 
+      command: nginx -s reload
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:     

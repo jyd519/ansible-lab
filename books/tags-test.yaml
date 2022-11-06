@@ -1,0 +1,30 @@
+---
+
+- name: test 
+  hosts: localhost
+  connection: local 
+  tasks:
+    - debug:
+        msg: "Makefile content is {{ lookup('file', './Makefile') }}"
+
+    - name: t1
+      debug:
+         msg: "debug1"
+      tags: [tag1]
+
+    - name: t2
+      debug:
+         msg: "debug2"
+      tags: [tag2, never] # 缺省不执行，除非指定了tags: tag2 或 never
+
+    - name: t3
+      debug:
+         msg: "debug3"
+      tags: tag3
+
+    - name: t4
+      debug:
+         msg: "debug4"
+      tags: [tag4, always] # 永远执行
+
+

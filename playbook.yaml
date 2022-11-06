@@ -7,3 +7,5 @@
     - { role: common, tags: ["common"] }
     - { role: nvim, tags: ["nvim"], become: yes }
     - { role: nginx, tags: ["nginx"] }
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

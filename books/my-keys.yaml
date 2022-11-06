@@ -1,0 +1,21 @@
+- name: Copy my configurations files
+  hosts: all 
+  tasks:
+    - name: Check if '-limit/-l' argument is provided
+      fail:
+        msg: "you must provides the -limit/-l argument to run this playbook"
+      when: ansible_limit is not defined
+
+    - name: Copy key files
+      copy:
+        src: "{{ item }}"
+        dest: "~/keys/"  # 结尾的/确保文件复制到目录中
+      with_fileglob:
+        - "~/keys/*"
+
+    - name: Copy ssh config files
+      copy:
+        src: "~/.ssh/config"
+        dest: "~/.ssh/config"  # 结尾的/确保文件复制到目录中
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:     

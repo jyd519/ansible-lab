@@ -1,0 +1,19 @@
+- name: Gather logs files from remote systems
+  hosts: all
+
+  vars:
+     output_dir: "{{ lookup('env','PWD') }}"
+
+  tasks:
+    - name: Find logs
+      find:
+        paths: /var/log/nginx
+        patterns: 'ts-api.log'
+        recurse: yes
+      register: _logs
+
+    - name: Fetch logs
+      fetch:
+        src: "{{ item.path }}"
+        dest: "{{output_dir}}/logs"
+      with_items: "{{ _logs.files }}"
