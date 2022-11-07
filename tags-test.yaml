@@ -6,7 +6,6 @@
   tasks:
     - debug:
         msg: "Makefile content is {{ lookup('file', './Makefile') }}"
-
     - name: t1
       debug:
          msg: "debug1"
@@ -27,4 +26,4 @@
          msg: "debug4"
       tags: [tag4, always] # 永远执行
 
-
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

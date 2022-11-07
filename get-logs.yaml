@@ -17,3 +17,6 @@
         src: "{{ item.path }}"
         dest: "{{output_dir}}/logs"
       with_items: "{{ _logs.files }}"
+
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

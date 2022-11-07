@@ -1,0 +1,6 @@
+# snap/ repo / prerelease
+nvim_from: prerelease
+
+nvim_version: v0.8.0
+nvim_prelease_url: "https://github.com/neovim/neovim/releases/download/{{nvim_version}}/nvim-linux64.tar.gz"
+nvim_prelease_checksum_url: "https://github.com/neovim/neovim/releases/download/{{nvim_version}}/nvim-linux64.tar.gz.sha256sum"

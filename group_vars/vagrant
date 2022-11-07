@@ -1,1 +1,4 @@
 nvim_user: vagrant
+proxy_env:
+  http_proxy: http://172.16.21.17:1083
+  https_proxy: http://172.16.21.17:1083

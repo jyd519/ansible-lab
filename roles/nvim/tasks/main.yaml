@@ -1,38 +1,46 @@
 ---
 
-- name: install neovim
+# Install neovim 
+- import_tasks: from_prerelease.yaml
+  when: nvim_from == "prerelease"  
+
+- name: Nvim | install neovim from repo
+  apt:
+    name: nvim 
+    state: present 
+    update_cache: yes
+  when: nvim_from == "repo"  
+
+- name: Nvim | install neovim from snap store
   snap: name=nvim state=present classic=yes
+  when: nvim_from == "snap"  
 
 # Configuration
-- name: create nvim config directry 
+- name: Nvim | create nvim config directry 
   file:
     path: ~/.config/nvim
     state: directory 
-  become_user: "{{nvim_user}}"
 
-- name: configure nvim
+- name: Nvim | configure nvim
   lineinfile:
     path: ~/.config/nvim/init.vim 
     line: "{{ item }}"
     state: present
     backup: no 
     create: yes
-  become_user: "{{nvim_user}}"
   with_items:
     - "set background=light"
     - "set modeline"
 
-- name: check if bashrc exists
+- name: Nvim | check if bashrc exists
   stat: path=~/.bashrc 
-  become_user: "{{nvim_user}}"
   register: bashrc 
 
-- name: create alias for nvim
-  become_user: "{{nvim_user}}"
+- name: Nvim | create alias for nvim
   lineinfile:
     path: ~/.bashrc 
     insertafter: "^alias\\s+"
-    line: "alias vim='/snap/bin/nvim'"
+    line: "alias vim='nvim'"
     state: present
     backup: no 
   when: bashrc.stat.exists

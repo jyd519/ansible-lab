@@ -1,0 +1,53 @@
+---
+
+- name: Nvim | Check for nvim
+  ansible.builtin.stat:
+    path: /opt/nvim/bin/nvim
+    follow: true
+  register: nvim_result
+
+- name: Nvim | Install from prerelease file 
+  block:
+  - name: Download nvim tar file 
+    ansible.builtin.get_url:
+      url: "{{nvim_prelease_url}}"
+      dest: "/tmp/nvim-{{ nvim_version }}.tar.gz"
+      checksum: "sha256:{{nvim_prelease_checksum_url}}"
+      mode: 0600
+    environment: "{{proxy_env}}"
+    register: nvim_tar_result
+
+  - name: Unpack nvim tar file
+    ansible.builtin.unarchive:
+      copy: false
+      dest: /tmp/
+      src: "{{ nvim_tar_result.dest }}"
+
+  - name: Install nvim files
+    ansible.builtin.copy:
+      remote_src: true
+      src: /tmp/nvim-linux64/
+      dest: /opt/nvim/ 
+      mode: "preserve"
+
+  - name: Link necessary files
+    ansible.builtin.file:
+      src: "{{item.src}}" 
+      dest: "{{item.dst}}"
+      state: link
+    with_items:
+      - {src: /opt/nvim/share/man/man1/*, dst: /usr/share/man/man1/}
+      - {src: /opt/nvim/bin/nvim, dst: /usr/local/bin/}
+  when:
+    - not nvim_result.stat.exists | bool
+
+- name: Nvim | Cleanup downloads
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ nvim_tar_result.dest }}"
+    - "/tmp/nvim-linux64"
+  when: item is defined
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

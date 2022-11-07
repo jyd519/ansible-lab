@@ -1,0 +1,36 @@
+- name: multiple file copying methods
+  hosts: all 
+
+  tasks:
+    # - name: Include variables (free-form)
+    #   ansible.builtin.include_vars: all.yaml
+
+    - name: "Print multiple variable"
+      debug:
+        msg:
+          - abc = {{ abc }}
+    
+    - name: "Ansible | List all known variables and facts"
+      debug:
+        var: hostvars[inventory_hostname]
+      when:
+        - ('allvars' in ansible_run_tags)
+
+    - name: "Ansible | Specail Variables"
+      debug:
+        msg:
+          - ansible_os_family = {{ansible_os_family}} 
+          - ansible_distribution = {{ansible_distribution}} 
+          - ansible_distribution_release = {{ansible_distribution_release}} 
+          - "ansible_system= {{ansible_system}}"
+          - ansible_run_tags = {{ansible_run_tags}}
+          - ansible_skip_tags = {{ansible_skip_tags}}
+          - aplaybook_dir = {{playbook_dir}}
+          - ansible_host = {{ansible_host}}
+          - inventory_hostname = {{inventory_hostname}}
+          - inventory_dir = {{ inventory_dir}}
+          - ansible_user = {{ansible_user}}
+          - ansible_limit = {{ansible_limit | default("")}}
+      tags: [var, never]
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:
