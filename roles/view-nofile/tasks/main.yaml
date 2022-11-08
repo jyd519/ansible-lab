@@ -1,0 +1,18 @@
+---
+
+- name: Inspect process's nofile limit
+  block:
+    - name: Inspect {{view_nofile_name}}
+      shell:
+        cmd: |
+            pgrep {{view_nofile_name}} | while read line; do printf "{{view_nofile_name}}> $line "; sudo prlimit -n -p "$line" | awk 'NR==2{print}' ; done
+      register: out
+      changed_when: no
+
+    - name: Print {{view_nofile_name}} nofile limit
+      debug: 
+        var=out.stdout_lines
+      when: (out.stdout_lines is defined)
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:
+

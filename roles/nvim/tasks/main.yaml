@@ -4,24 +4,24 @@
 - import_tasks: from_prerelease.yaml
   when: nvim_from == "prerelease"  
 
-- name: Nvim | install neovim from repo
+- name: Install neovim from repo
   apt:
     name: nvim 
     state: present 
     update_cache: yes
   when: nvim_from == "repo"  
 
-- name: Nvim | install neovim from snap store
+- name: Install neovim from snap store
   snap: name=nvim state=present classic=yes
   when: nvim_from == "snap"  
 
 # Configuration
-- name: Nvim | create nvim config directry 
+- name: Create nvim config directry 
   file:
     path: ~/.config/nvim
     state: directory 
 
-- name: Nvim | configure nvim
+- name: Configure nvim
   lineinfile:
     path: ~/.config/nvim/init.vim 
     line: "{{ item }}"
@@ -32,11 +32,11 @@
     - "set background=light"
     - "set modeline"
 
-- name: Nvim | check if bashrc exists
+- name: Check if bashrc exists
   stat: path=~/.bashrc 
   register: bashrc 
 
-- name: Nvim | create alias for nvim
+- name: Create alias for nvim
   lineinfile:
     path: ~/.bashrc 
     insertafter: "^alias\\s+"
@@ -45,8 +45,3 @@
     backup: no 
   when: bashrc.stat.exists
 
-# - name: Symlink vimrc
-#   file:
-#     src: "{{ dotfiles_home }}/roles/vim/files/vimrc"
-#     dest: "{{dotfiles_user_home}}/.vimrc"
-#     state: link

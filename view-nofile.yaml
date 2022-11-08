@@ -1,0 +1,55 @@
+---
+
+- name: View nofile limits
+  hosts: all 
+  tasks:
+    - name: Check if '-limit/-l' argument is provided
+      fail:
+        msg: "you must provides the -limit/-l argument to run this playbook"
+      when: ansible_limit is not defined
+
+    - name: Nginx | Read nofile limits
+      block:
+        - name: Inspect nginx processes
+          get_nofile: name=nginx
+          ignore_errors: true
+          register: nginx_nofile
+
+        - name: Nginx | Output nofile limits
+          debug: 
+            var=nginx_nofile.limits
+          when: (nginx_nofile.limits)
+      tags: [nginx]
+      when: (ansible_facts['system'] == "Linux")
+    
+    - name: Check if supervisor is running
+      block:
+        - command: systemctl status supervisor 
+          failed_when: false
+          changed_when: false
+          register: service_supervisor_status
+
+        - name: Report status of supervisor 
+          debug:
+            msg: "Supervisor is not installed {{service_supervisor_status.rc}}"
+          when: service_supervisor_status.rc != 0
+      tags: [supervisor]
+
+    - name: Supervisor | Read nofile limits
+      block:
+      - name: Inspect supervisord
+        shell:
+          cmd: |
+            pgrep supervisord | while read line; do printf "supervisord: $line "; sudo prlimit -n -p "$line" | awk 'NR==2{print}' ; done
+        register: out
+        changed_when: no
+
+      - name: Supervisor | Output nofile limits
+        debug: 
+          var=out.stdout_lines
+        when: (out.stdout_lines is defined)
+
+      when: (service_supervisor_status.rc == 0)
+      tags: [supervisor]
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:     

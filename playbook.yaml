@@ -4,8 +4,13 @@
   hosts: all
   become: yes
   roles:
-    - { role: common, tags: ["common"] }
-    - { role: nvim, tags: ["nvim"], become: yes }
-    - { role: nginx, tags: ["nginx"] }
+    - { role: common, tags: ["common", never] }
+    - { role: nvim, tags: ["nvim", never], become: yes }
+    - { role: nginx, tags: ["nginx", never] }
+
+    - role: view-nofile
+      vars:
+        view_nofile_name: supervisor
+      tags: [nofile]
 
 # vim:set et sw=2 ts=2 ft=yaml.ansible:

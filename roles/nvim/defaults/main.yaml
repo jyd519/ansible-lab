@@ -1,6 +1,8 @@
 # snap/ repo / prerelease
 nvim_from: prerelease
 
+# linux64 / macos
+nvim_target_os: linux64
 nvim_version: v0.8.0
-nvim_prelease_url: "https://github.com/neovim/neovim/releases/download/{{nvim_version}}/nvim-linux64.tar.gz"
-nvim_prelease_checksum_url: "https://github.com/neovim/neovim/releases/download/{{nvim_version}}/nvim-linux64.tar.gz.sha256sum"
+nvim_prelease_url: "https://github.com/neovim/neovim/releases/download/{{nvim_version}}/nvim-{{nvim_target_os}}.tar.gz"
+nvim_prelease_checksum_url: "https://github.com/neovim/neovim/releases/download/{{nvim_version}}/nvim-{{nvim_target_os}}.tar.gz.sha256sum"

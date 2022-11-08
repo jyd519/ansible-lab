@@ -31,8 +31,8 @@
       - regexp: ^#?Banner
         line: Banner /etc/issue
 
-      - regexp: ^#?permituserenvironment
-        line: permituserenvironment no
+      - regexp: ^#?PermitUserEnvironment
+        line: PermitUserEnvironment no
 
       - regexp: (?i)^#?Ciphers
         line: Ciphers aes128-ctr,aes192-ctr,aes256-ctr
@@ -43,8 +43,8 @@
       - regexp: ^#?IgnoreRhosts
         line: IgnoreRhosts yes
 
-      - regexp: ^#?PermitRootLogin
-        line: PermitRootLogin no
+      # - regexp: ^#?PermitRootLogin
+      #   line: PermitRootLogin no
 
   tasks:
     - name: Harden ssh settings

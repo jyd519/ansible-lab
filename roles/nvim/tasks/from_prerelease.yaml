@@ -26,7 +26,7 @@
   - name: Install nvim files
     ansible.builtin.copy:
       remote_src: true
-      src: /tmp/nvim-linux64/
+      src: "/tmp/nvim-{{nvim_target_os}}/"
       dest: /opt/nvim/ 
       mode: "preserve"
 
@@ -47,7 +47,7 @@
     state: absent
   loop:
     - "{{ nvim_tar_result.dest }}"
-    - "/tmp/nvim-linux64"
+    - "/tmp/nvim-{{nvim_target_os}}"
   when: item is defined
 
 # vim:set et sw=2 ts=2 ft=yaml.ansible:

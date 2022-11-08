@@ -5,6 +5,11 @@
     # - name: Include variables (free-form)
     #   ansible.builtin.include_vars: all.yaml
 
+    - custom_module:
+        user: someone
+        password: something
+        data: "some random string"
+
     - name: "Print multiple variable"
       debug:
         msg:
