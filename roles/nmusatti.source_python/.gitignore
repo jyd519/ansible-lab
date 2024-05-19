@@ -1,0 +1,7 @@
+/.project
+/.pydevproject
+.yamllint
+__pycache__/
+*.pyc
+.cache/
+.tox/

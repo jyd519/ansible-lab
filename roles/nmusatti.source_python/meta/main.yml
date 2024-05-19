@@ -1,0 +1,28 @@
+---
+galaxy_info:
+  role_name: source_python
+  namespace: nmusatti
+  author: Nicola Musatti
+  description: Install Python from source
+  license: license (GPLv3)
+  min_ansible_version: "2.9"
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+        - "8"
+        - "7"
+    - name: Fedora
+      versions:
+        - "36"
+        - "35"
+    - name: Ubuntu
+      versions:
+        - jammy
+        - focal
+        - bionic
+  galaxy_tags:
+    - development
+    - packaging
+    - python
+dependencies: []

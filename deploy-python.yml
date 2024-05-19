@@ -1,0 +1,14 @@
+---
+
+- name: install python
+  hosts: all
+
+  vars:
+    nginx_install_from: repo
+
+  roles:
+     - role: nmusatti.source_python
+       vars:
+         python_release: 3.11.0
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

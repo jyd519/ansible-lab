@@ -1,0 +1,46 @@
+---
+
+- name: Add EPEL YUM repo
+  yum_repository:
+    name: epel
+    description: EPEL YUM repo
+    baseurl: "{{ supervisor_epel_yumrepo_url }}"
+    gpgkey: "{{ supervisor_epel_yumrepo_gpgkey }}"
+  args: "{{ supervisor_epel_yumrepo_params }}"
+  when: >
+    ansible_os_family == 'RedHat' and
+    supervisor_epel_install == true
+  tags:
+    - supervisor_pkg
+
+- name: Install Supervisor
+  package:
+    name: "{{ supervisor_pkg }}"
+  notify:
+    - Restart Supervisor service
+  tags:
+    - supervisor_pkg
+
+- name: Configure Supervisor
+  template:
+    src: supervisord.conf.j2
+    dest: "{{ supervisor_config_file }}"
+  notify:
+    - Restart Supervisor service
+  tags:
+    - supervisor_config
+
+- name: Enable Supervisor service
+  service:
+    name: "{{ supervisor_service }}"
+    enabled: yes
+  tags:
+    - supervisor_service
+
+- name: Start Supervisor service
+  service:
+    name: "{{ supervisor_service }}"
+    state: started
+  register: supervisor_service_started
+  tags:
+    - supervisor_service

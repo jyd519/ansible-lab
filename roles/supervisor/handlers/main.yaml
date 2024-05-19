@@ -1,0 +1,10 @@
+---
+
+- name: Restart Supervisor service
+  service:
+    name: "{{ supervisor_service }}"
+    state: restarted
+  register: supervisor_service_restarted
+  when: >
+    supervisor_service_started is not defined or
+    not supervisor_service_started.changed

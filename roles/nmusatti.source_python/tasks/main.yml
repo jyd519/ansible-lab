@@ -1,0 +1,188 @@
+---
+- name: Create the Python installation group
+  ansible.builtin.group:
+    name: "{{ python_group }}"
+  become: true
+
+- name: Create the Python installation owner
+  ansible.builtin.user:
+    name: "{{ python_user }}"
+    group: "{{ python_group }}"
+  become: true
+
+- name: Install dependencies (RedHat distros except EL 9)
+  ansible.builtin.yum:
+    name:
+      - bzip2-devel
+      - gcc
+      - gdbm-devel
+      - libdb
+      - libdb-devel
+      - libffi-devel
+      - libuuid-devel
+      - make
+      - ncurses
+      - ncurses-devel
+      - ncurses-libs
+      - openssl-devel
+      - readline-devel
+      - sqlite-devel
+      - tar
+      - tcl-devel
+      - tk-devel
+      - xz
+      - xz-devel
+    state: present
+  become: true
+  retries: 3
+  delay: 3
+  when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] != '9'
+
+- name: Install dependencies (RedHat EL 9)
+  ansible.builtin.yum:
+    name:
+      - bzip2-devel
+      - gcc
+      # - gdbm-devel
+      - libdb
+      - libdb-devel
+      - libffi-devel
+      - libuuid-devel
+      - make
+      - ncurses
+      - ncurses-devel
+      - ncurses-libs
+      - openssl-devel
+      - readline-devel
+      - sqlite-devel
+      - tar
+      - tcl-devel
+      - tk-devel
+      - xz
+      - xz-devel
+    state: present
+  become: true
+  retries: 3
+  delay: 3
+  when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] == '9'
+
+- name: Install dependencies (Ubuntu)
+  ansible.builtin.apt:
+    name:
+      - libbz2-dev
+      - gcc
+      - libgdbm-dev
+      - libdb-dev
+      - libffi-dev
+      - uuid-dev
+      - make
+      - libncurses-dev
+      - libssl-dev
+      - libreadline-dev
+      - libsqlite3-dev
+      - tar
+      - tcl-dev
+      - tk-dev
+      - libxv-dev
+      - liblzma-dev
+    state: present
+  become: true
+  retries: 3
+  delay: 3
+  when: ansible_facts['distribution'] == "Ubuntu"
+
+- name: Delete source directory
+  ansible.builtin.file:
+    path: "{{ python_src_dir }}"
+    state: absent
+  become: true
+  when: python_force
+
+- name: Create source directory
+  ansible.builtin.file:
+    group: "{{ python_group }}"
+    mode: 0755
+    owner: "{{ python_user }}"
+    path: "{{ python_src_dir }}"
+    state: directory
+  become: true
+
+- name: Remove the archive
+  ansible.builtin.file:
+    path: "{{ python_src_dir }}/{{ python_archive }}"
+    state: absent
+  become: true
+  when: python_force
+
+- name: Check the archive isn't already available
+  ansible.builtin.stat:
+    path: "{{ python_src_dir }}/{{ python_archive }}"
+  register: archive_stat_result
+
+- name: Download the source archive
+  ansible.builtin.get_url:
+    dest: "{{ python_src_dir }}"
+    group: "{{ python_group }}"
+    owner: "{{ python_user }}"
+    url: "{{ python_url }}"
+    mode: 0644
+  become: true
+  retries: 3
+  delay: 3
+  when: not archive_stat_result.stat.exists
+
+- name: Unpack the Python source archive
+  ansible.builtin.unarchive:
+    src: "{{ python_src_dir }}/{{ python_archive }}"
+    dest: "{{ python_src_dir }}"
+    group: "{{ python_group }}"
+    owner: "{{ python_user }}"
+    mode: 0755
+    remote_src: true
+  become: true
+
+- name: Check configure hasn't run
+  ansible.builtin.stat:
+    path: "{{ python_src_dir }}/Python-{{ python_release }}/config.log"
+  register: configure_stat_result
+
+- name: Run ./configure
+  ansible.builtin.command: >
+    ./configure --prefix={{ python_install_dir }}/Python-{{
+    python_minor }} chdir={{ python_src_dir }}/Python-{{ python_release }}
+  become: true
+  become_user: "{{ python_user }}"
+  register: configure_result
+  when: not configure_stat_result.stat.exists
+
+- name: Run make
+  ansible.builtin.make:
+    chdir: "{{ python_src_dir }}/Python-{{ python_release }}"
+  become: true
+  become_user: "{{ python_user }}"
+  register: make_result
+  when: configure_result is not skipped
+
+- name: Delete installation directory
+  ansible.builtin.file:
+    path: "{{ python_install_dir }}/Python-{{ python_minor }}"
+    state: absent
+  become: true
+  when: python_force and make_result is not skipped
+
+- name: Run make install
+  ansible.builtin.make:
+    chdir: "{{ python_src_dir }}/Python-{{ python_release }}"
+    target: install
+  become: true
+  register: install_result
+  when: make_result is not skipped
+
+- name: Set permissions
+  ansible.builtin.file:
+    path: "{{ python_install_dir }}/Python-{{ python_minor }}"
+    owner: "{{ python_user }}"
+    group: "{{ python_group }}"
+    recurse: true
+  become: true
+  when: install_result is not skipped
