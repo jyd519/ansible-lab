@@ -2,7 +2,10 @@
 
 - name: install neovim
   hosts: all
-
+  # vars:
+  #   proxy_env:
+  #       HTTP_PROXY: http://192.168.50.92:1082
+  #       HTTPS_PROXY: http://192.168.50.92:1082
   roles:
     - { role: nvim, tags: ["nvim"], become: yes }
 

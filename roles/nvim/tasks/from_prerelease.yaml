@@ -36,8 +36,8 @@
       dest: "{{item.dst}}"
       state: link
     with_items:
-      - {src: /opt/nvim/share/man/man1/*, dst: /usr/share/man/man1/}
-      - {src: /opt/nvim/bin/nvim, dst: /usr/local/bin/}
+      - {src: /opt/nvim/share/man/man1/nvim.1, dst: /usr/share/man/man1/nvim.1}
+      - {src: /opt/nvim/bin/nvim, dst: /usr/local/bin/nvim}
   when:
     - not nvim_result.stat.exists | bool
 
