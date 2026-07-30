@@ -1,29 +1,34 @@
 ---
-
-- name: test 
+- name: test
   hosts: localhost
-  connection: local 
+  connection: local
   tasks:
-    - debug:
+    - name: Read content of Makefile
+      debug:
         msg: "Makefile content is {{ lookup('file', './Makefile') }}"
+
+    - name: t0
+      debug:
+        msg: "debug0: [ ] no tags"
+
     - name: t1
       debug:
-         msg: "debug1"
+        msg: "debug1: [tag1]"
       tags: [tag1]
 
     - name: t2
       debug:
-         msg: "debug2"
+        msg: "t2: [tag2, never]"
       tags: [tag2, never] # 缺省不执行，除非指定了tags: tag2 或 never
 
     - name: t3
       debug:
-         msg: "debug3"
+        msg: "debug3: tag3"
       tags: tag3
 
     - name: t4
       debug:
-         msg: "debug4"
+        msg: "debug4: [tag4, always]"
       tags: [tag4, always] # 永远执行
 
 # vim:set et sw=2 ts=2 ft=yaml.ansible:

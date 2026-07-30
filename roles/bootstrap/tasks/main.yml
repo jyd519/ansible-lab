@@ -1,0 +1,8 @@
+---
+- name: Copy apt sources.list
+  ansible.builtin.copy:
+    src: "apt-sources-ubuntu-{{ansible_distribution_release}}.list"
+    dest: /etc/apt/sources.list
+    mode: 0644
+  when: ansible_os_family == "Debian" and use_aliyun_apt_mirror
+  notify: update_apt

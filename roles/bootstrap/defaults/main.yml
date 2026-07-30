@@ -1,0 +1,3 @@
+---
+# 使用阿里云apt源
+use_aliyun_apt_mirror: true

@@ -1,0 +1,61 @@
+---
+- name: Install OpenResty on Ubuntu
+  hosts: all
+  become: yes
+  vars:
+    openresty_packages:
+      - openresty
+      - openresty-resty # resty 命令行工具
+      - openresty-opm # OPM 包管理器
+    install_dir: "/usr/local/openresty"
+
+  tasks:
+    # 1. 安装前置依赖
+    - name: Install prerequisites
+      apt:
+        name:
+          - curl
+          - wget
+          - gnupg
+          - ca-certificates
+          - lsb-release
+        state: present
+        update_cache: yes
+
+    # 2. 导入 OpenResty GPG 密钥 (Ubuntu 22.04+ 推荐方式)
+    - name: Add OpenResty GPG key
+      apt_key:
+        url: https://openresty.org/package/pubkey.gpg
+        keyring: /usr/share/keyrings/openresty.gpg
+        state: present
+
+    # 3. 添加 OpenResty APT 仓库
+    - name: Add OpenResty APT repository
+      apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/openresty.gpg] http://openresty.org/package/ubuntu {{ ansible_distribution_release }} main"
+        state: present
+        filename: openresty
+        update_cache: yes
+
+    # 4. 安装 OpenResty
+    - name: Install OpenResty packages
+      apt:
+        name: "{{ openresty_packages }}"
+        state: present
+
+    # 5. 启动并启用服务
+    - name: Enable and start OpenResty service
+      systemd:
+        name: openresty
+        enabled: yes
+        state: started
+
+    # 6. 验证安装
+    - name: Verify OpenResty installation
+      command: openresty -v
+      register: openresty_version
+      changed_when: false
+
+    - name: Display OpenResty version
+      debug:
+        msg: "{{ openresty_version.stderr | default(openresty_version.stdout) }}"
