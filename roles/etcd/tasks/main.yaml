@@ -1,0 +1,109 @@
+---
+
+- name: Create etcd group
+  ansible.builtin.group:
+    name: "{{ etcd_group }}"
+    system: true
+    state: present
+
+- name: Create etcd user
+  ansible.builtin.user:
+    name: "{{ etcd_user }}"
+    group: "{{ etcd_group }}"
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+
+- name: Create etcd directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: "{{ etcd_install_dir }}", owner: root, group: root, mode: "0755" }
+    - { path: "{{ etcd_data_dir }}", owner: "{{ etcd_user }}", group: "{{ etcd_group }}", mode: "0700" }
+    - { path: "{{ etcd_config_dir }}", owner: root, group: "{{ etcd_group }}", mode: "0750" }
+
+- name: Check installed etcd version
+  ansible.builtin.command: "{{ etcd_install_dir }}/etcd --version"
+  register: etcd_installed_version
+  changed_when: false
+  failed_when: false
+
+- name: Set version needs update fact
+  ansible.builtin.set_fact:
+    etcd_needs_install: >-
+      {{ etcd_installed_version.rc != 0 or
+         ('etcd Version: ' + etcd_version) not in etcd_installed_version.stdout }}
+
+- name: Download etcd tarball
+  ansible.builtin.get_url:
+    url: "{{ etcd_download_url }}"
+    dest: "/tmp/etcd-v{{ etcd_version }}-linux-{{ etcd_arch }}.tar.gz"
+    mode: "0644"
+  when: etcd_needs_install | bool
+
+- name: Extract etcd tarball
+  ansible.builtin.unarchive:
+    src: "/tmp/etcd-v{{ etcd_version }}-linux-{{ etcd_arch }}.tar.gz"
+    dest: /tmp
+    remote_src: true
+  when: etcd_needs_install | bool
+
+- name: Install etcd binaries
+  ansible.builtin.copy:
+    src: "/tmp/etcd-v{{ etcd_version }}-linux-{{ etcd_arch }}/{{ item }}"
+    dest: "{{ etcd_install_dir }}/{{ item }}"
+    owner: root
+    group: root
+    mode: "0755"
+    remote_src: true
+  loop: "{{ etcd_binaries }}"
+  when: etcd_needs_install | bool
+  notify: Restart etcd
+
+- name: Symlink etcd binaries to /usr/local/bin
+  ansible.builtin.file:
+    src: "{{ etcd_install_dir }}/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    state: link
+  loop: "{{ etcd_binaries }}"
+
+- name: Clean up downloaded files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/tmp/etcd-v{{ etcd_version }}-linux-{{ etcd_arch }}.tar.gz"
+    - "/tmp/etcd-v{{ etcd_version }}-linux-{{ etcd_arch }}"
+  when: etcd_needs_install | bool
+
+- name: Render etcd configuration
+  ansible.builtin.template:
+    src: etcd.conf.yaml.j2
+    dest: "{{ etcd_config_file }}"
+    owner: root
+    group: "{{ etcd_group }}"
+    mode: "0640"
+  notify: Restart etcd
+
+- name: Render etcd systemd unit
+  ansible.builtin.template:
+    src: etcd.service.j2
+    dest: /etc/systemd/system/etcd.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Systemd daemon-reload
+    - Restart etcd
+
+- name: Enable and start etcd service
+  ansible.builtin.systemd:
+    name: etcd
+    enabled: true
+    state: started
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

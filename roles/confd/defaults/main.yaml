@@ -1,0 +1,71 @@
+---
+
+confd_version: "0.16.0"
+
+confd_install_dir: /usr/share/confd
+confd_config_dir: /etc/confd
+confd_conf_dir: "{{ confd_config_dir }}/conf.d"
+confd_template_dir: "{{ confd_config_dir }}/templates"
+confd_config_file: "{{ confd_config_dir }}/confd.toml"
+
+confd_user: confd
+confd_group: confd
+
+confd_arch_map:
+  x86_64: amd64
+  aarch64: arm64
+confd_arch: "{{ confd_arch_map[ansible_architecture] | default('amd64') }}"
+
+confd_download_url: >-
+  https://github.com/kelseyhightower/confd/releases/download/v{{ confd_version }}/confd-{{ confd_version }}-linux-{{ confd_arch }}
+
+# Backend: etcd | consul | env | file | redis | vault | dynamodb | zookeeper
+confd_backend: etcd
+
+# Backend nodes (list of URLs)
+confd_backend_nodes:
+  - "http://127.0.0.1:2379"
+
+# Scheme for backend connections (http or https)
+confd_scheme: http
+
+# Watch mode: true = long-poll backend for changes, false = poll at interval
+confd_watch: true
+
+# Polling interval in seconds (only used when confd_watch is false)
+confd_interval: 300
+
+# Log level: debug | info | warn | error
+confd_log_level: info
+
+# Authentication (optional, empty means disabled)
+confd_auth_token: ""
+confd_basic_auth: false
+confd_username: ""
+confd_password: ""
+
+# TLS client certificates for backend (optional)
+confd_client_cert: ""
+confd_client_key: ""
+confd_client_ca_keys: ""
+
+# Prefix for keys in backend
+confd_prefix: "/"
+
+# Template resources to deploy (list of dicts)
+# Each item: { name, src (template file in playbook), dest (on remote conf.d) }
+confd_template_resources: []
+
+# Templates to deploy (list of dicts)
+# Each item: { name, src (template file in playbook), dest (on remote templates dir) }
+confd_templates: []
+
+# Extra paths confd is allowed to write (for generated config files)
+# e.g. ["/etc/nginx", "/etc/myapp"]
+confd_extra_readwrite_paths: []
+
+# Directories to grant confd write access via POSIX ACL
+# e.g. ["/etc/nginx/conf.d", "/etc/myapp"]
+confd_acl_write_dirs: []
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

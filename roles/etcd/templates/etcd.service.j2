@@ -1,0 +1,26 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=etcd key-value store
+Documentation=https://etcd.io/docs/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User={{ etcd_user }}
+Group={{ etcd_group }}
+ExecStart={{ etcd_install_dir }}/etcd --config-file {{ etcd_config_file }}
+Restart=on-failure
+RestartSec=5s
+LimitNOFILE=65536
+TimeoutStartSec=0
+
+ProtectSystem=full
+ProtectHome=true
+NoNewPrivileges=true
+PrivateTmp=true
+ReadWritePaths={{ etcd_data_dir }}
+
+[Install]
+WantedBy=multi-user.target

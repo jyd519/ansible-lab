@@ -1,0 +1,137 @@
+---
+
+- name: Create confd group
+  ansible.builtin.group:
+    name: "{{ confd_group }}"
+    system: true
+    state: present
+
+- name: Create confd user
+  ansible.builtin.user:
+    name: "{{ confd_user }}"
+    group: "{{ confd_group }}"
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+
+- name: Create confd directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: "{{ confd_install_dir }}", owner: root, group: root, mode: "0755" }
+    - { path: "{{ confd_config_dir }}", owner: root, group: "{{ confd_group }}", mode: "0750" }
+    - { path: "{{ confd_conf_dir }}", owner: root, group: "{{ confd_group }}", mode: "0750" }
+    - { path: "{{ confd_template_dir }}", owner: root, group: "{{ confd_group }}", mode: "0750" }
+
+- name: Check installed confd version
+  ansible.builtin.command: "{{ confd_install_dir }}/confd --version"
+  register: confd_installed_version
+  changed_when: false
+  failed_when: false
+
+- name: Set version needs update fact
+  ansible.builtin.set_fact:
+    confd_needs_install: >-
+      {{ confd_installed_version.rc != 0 or
+         confd_version not in (confd_installed_version.stdout | default('')) }}
+
+- name: Download confd binary
+  ansible.builtin.get_url:
+    url: "{{ confd_download_url }}"
+    dest: "/tmp/confd-{{ confd_version }}-linux-{{ confd_arch }}"
+    mode: "0644"
+  when: confd_needs_install | bool
+
+- name: Install confd binary
+  ansible.builtin.copy:
+    src: "/tmp/confd-{{ confd_version }}-linux-{{ confd_arch }}"
+    dest: "{{ confd_install_dir }}/confd"
+    owner: root
+    group: root
+    mode: "0755"
+    remote_src: true
+  when: confd_needs_install | bool
+  notify: Restart confd
+
+- name: Symlink confd to /usr/local/bin
+  ansible.builtin.file:
+    src: "{{ confd_install_dir }}/confd"
+    dest: /usr/local/bin/confd
+    state: link
+
+- name: Clean up downloaded file
+  ansible.builtin.file:
+    path: "/tmp/confd-{{ confd_version }}-linux-{{ confd_arch }}"
+    state: absent
+  when: confd_needs_install | bool
+
+- name: Render confd configuration
+  ansible.builtin.template:
+    src: confd.toml.j2
+    dest: "{{ confd_config_file }}"
+    owner: root
+    group: "{{ confd_group }}"
+    mode: "0640"
+  notify: Restart confd
+
+- name: Deploy template resources
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ confd_conf_dir }}/{{ item.name }}"
+    owner: root
+    group: "{{ confd_group }}"
+    mode: "0640"
+  loop: "{{ confd_template_resources }}"
+  notify: Restart confd
+
+- name: Deploy templates
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ confd_template_dir }}/{{ item.name }}"
+    owner: root
+    group: "{{ confd_group }}"
+    mode: "0640"
+  loop: "{{ confd_templates }}"
+  notify: Restart confd
+
+- name: Grant confd write access via ACL
+  ansible.posix.acl:
+    path: "{{ item }}"
+    entity: "{{ confd_user }}"
+    etype: user
+    permissions: rwx
+    state: present
+  loop: "{{ confd_acl_write_dirs }}"
+
+- name: Set default ACL so new files inherit confd write access
+  ansible.posix.acl:
+    path: "{{ item }}"
+    entity: "{{ confd_user }}"
+    etype: user
+    permissions: rw
+    default: true
+    state: present
+  loop: "{{ confd_acl_write_dirs }}"
+
+- name: Render confd systemd unit
+  ansible.builtin.template:
+    src: confd.service.j2
+    dest: /etc/systemd/system/confd.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Systemd daemon-reload
+    - Restart confd
+
+- name: Enable and start confd service
+  ansible.builtin.systemd:
+    name: confd
+    enabled: true
+    state: started
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

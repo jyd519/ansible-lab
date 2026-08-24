@@ -1,0 +1,17 @@
+- name: Install etcd
+  hosts: all
+  become: yes
+
+  pre_tasks:
+    - name: Check if '-limit/-l' argument is provided
+      fail:
+        msg: "you must provides the -limit/-l argument to run this playbook"
+      when: ansible_limit is not defined
+
+  roles:
+    - role: etcd
+      # etcd_version: "3.5.21"
+      # etcd_listen_client_urls: "http://0.0.0.0:2379"
+      # etcd_advertise_client_urls: "http://{{ ansible_default_ipv4.address }}:2379"
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

@@ -1,0 +1,13 @@
+---
+
+- name: Systemd daemon-reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart etcd
+  ansible.builtin.systemd:
+    name: etcd
+    state: restarted
+    enabled: true
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

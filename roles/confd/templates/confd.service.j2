@@ -1,0 +1,29 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=confd configuration management agent
+Documentation=https://github.com/kelseyhightower/confd
+After=network-online.target
+Wants=network-online.target
+{% if confd_backend == 'etcd' %}
+After=etcd.service
+{% endif %}
+
+[Service]
+Type=simple
+User={{ confd_user }}
+Group={{ confd_group }}
+ExecStart={{ confd_install_dir }}/confd -config-file {{ confd_config_file }}
+Restart=on-failure
+RestartSec=10s
+
+ProtectSystem=full
+ProtectHome=true
+NoNewPrivileges=true
+PrivateTmp=true
+{% if confd_extra_readwrite_paths %}
+ReadWritePaths={{ confd_extra_readwrite_paths | join(' ') }}
+{% endif %}
+
+[Install]
+WantedBy=multi-user.target

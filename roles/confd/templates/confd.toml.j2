@@ -1,0 +1,29 @@
+{{ ansible_managed | comment }}
+
+backend = "{{ confd_backend }}"
+confdir = "{{ confd_config_dir }}"
+log-level = "{{ confd_log_level }}"
+interval = {{ confd_interval }}
+nodes = [{{ confd_backend_nodes | map('regex_replace', '^(.*)$', '"\1"') | join(', ') }}]
+prefix = "{{ confd_prefix }}"
+scheme = "{{ confd_scheme }}"
+watch = {{ confd_watch | lower }}
+{% if confd_auth_token %}
+
+auth_token = "{{ confd_auth_token }}"
+{% endif %}
+{% if confd_basic_auth %}
+
+basic_auth = true
+username = "{{ confd_username }}"
+password = "{{ confd_password }}"
+{% endif %}
+{% if confd_client_cert %}
+
+client_cert = "{{ confd_client_cert }}"
+client_key = "{{ confd_client_key }}"
+{% endif %}
+{% if confd_client_ca_keys %}
+
+client_ca_keys = "{{ confd_client_ca_keys }}"
+{% endif %}

@@ -1,0 +1,28 @@
+- name: Install confd
+  hosts: all
+  become: yes
+
+  pre_tasks:
+    - name: Check if '-limit/-l' argument is provided
+      fail:
+        msg: "you must provides the -limit/-l argument to run this playbook"
+      when: ansible_limit is not defined
+
+  roles:
+    - role: confd
+      # confd_version: "0.16.0"
+      # confd_backend: etcd
+      # confd_backend_nodes:
+      #   - "http://127.0.0.1:2379"
+      # confd_watch: true
+      # confd_log_level: info
+
+      # Deploy template resources and templates together:
+      # confd_template_resources:
+      #   - name: myapp.toml
+      #     src: files/confd/conf.d/myapp.toml
+      # confd_templates:
+      #   - name: myapp.conf.tmpl
+      #     src: files/confd/templates/myapp.conf.tmpl
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

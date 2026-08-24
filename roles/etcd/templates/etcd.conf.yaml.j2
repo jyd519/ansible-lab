@@ -1,0 +1,16 @@
+{{ ansible_managed | comment }}
+
+name: {{ etcd_name }}
+data-dir: {{ etcd_data_dir }}
+
+listen-client-urls: {{ etcd_listen_client_urls }}
+advertise-client-urls: {{ etcd_advertise_client_urls }}
+listen-peer-urls: {{ etcd_listen_peer_urls }}
+initial-advertise-peer-urls: {{ etcd_initial_advertise_peer_urls }}
+
+initial-cluster: {{ etcd_initial_cluster }}
+initial-cluster-state: {{ etcd_initial_cluster_state }}
+initial-cluster-token: {{ etcd_initial_cluster_token }}
+
+auto-compaction-retention: "{{ etcd_auto_compaction_retention }}"
+quota-backend-bytes: {{ etcd_quota_backend_bytes }}
