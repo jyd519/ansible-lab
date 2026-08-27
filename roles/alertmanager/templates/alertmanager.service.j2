@@ -1,0 +1,50 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Prometheus Alertmanager
+Documentation=https://prometheus.io/docs/alerting/latest/alertmanager/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ alertmanager_user }}
+Group={{ alertmanager_group }}
+ExecStart={{ alertmanager_install_dir }}/alertmanager \
+  --config.file={{ alertmanager_config_file }} \
+  --storage.path={{ alertmanager_data_dir }} \
+  --web.listen-address={{ alertmanager_web_listen_address }} \
+  --cluster.listen-address={{ alertmanager_cluster_listen_address }} \
+{% if alertmanager_web_config_enabled | bool %}
+  --web.config.file={{ alertmanager_web_config_file }} \
+{% endif %}
+{% if alertmanager_web_external_url | length > 0 %}
+  --web.external-url={{ alertmanager_web_external_url }} \
+{% endif %}
+  --log.level=info
+Restart=on-failure
+RestartSec=5s
+LimitNOFILE=65536
+TimeoutStartSec=0
+
+# --- 安全沙箱 ---
+ProtectSystem=full
+ProtectHome=true
+NoNewPrivileges=true
+PrivateTmp=true
+ReadWritePaths={{ alertmanager_data_dir }}
+CapabilityBoundingSet=
+AmbientCapabilities=
+LockPersonality=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

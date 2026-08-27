@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#
+# VictoriaMetrics 备份脚本（由 Ansible 渲染，调用 vmbackup-prod）
+# vmbackup 通过快照做增量/全量备份，无需停止 victoriametrics 服务。
+#
+set -euo pipefail
+
+{{ victoriametrics_install_dir }}/vmbackup-prod \
+  -storageDataPath={{ victoriametrics_storage_data_path }} \
+  -snapshot.createURL={{ victoriametrics_backup_snapshot_create_url }} \
+  -dst={{ victoriametrics_backup_dst }} >> {{ victoriametrics_backup_log_file }} 2>&1
+
+# vim:set et sw=2 ts=2 ft=sh:

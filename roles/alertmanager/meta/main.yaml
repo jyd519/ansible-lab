@@ -1,0 +1,25 @@
+---
+
+galaxy_info:
+  author: jiyongdong
+  description: Install Prometheus Alertmanager from GitHub releases as a hardened systemd service
+  license: MIT
+  min_ansible_version: "2.10"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+
+dependencies: []
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

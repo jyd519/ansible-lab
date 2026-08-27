@@ -1,0 +1,23 @@
+---
+- name: Install VictoriaMetrics
+  hosts: all
+  become: yes
+
+  pre_tasks:
+    - name: Check if '-limit/-l' argument is provided
+      fail:
+        msg: "you must provides the -limit/-l argument to run this playbook"
+      when: ansible_limit is not defined
+
+  roles:
+    - role: victoriametrics
+      # victoriametrics_version: "1.150.0"
+      # victoriametrics_http_listen_address: "0.0.0.0:8428"
+      # victoriametrics_retention_period: "4"
+      # victoriametrics_install_vmutils: true
+      # victoriametrics_backup_enabled: true
+      # victoriametrics_backup_dst: "fs:///var/backups/victoriametrics"
+      # victoriametrics_backup_minute: "0"
+      # victoriametrics_backup_hour: "2"
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

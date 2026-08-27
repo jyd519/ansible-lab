@@ -1,0 +1,67 @@
+---
+victoriametrics_version: "1.150.0"
+
+victoriametrics_install_dir: /usr/share/victoriametrics
+victoriametrics_data_dir: /var/lib/victoriametrics
+victoriametrics_config_dir: /etc/victoriametrics
+victoriametrics_bin: victoria-metrics-prod
+
+victoriametrics_user: victoriametrics
+victoriametrics_group: victoriametrics
+
+victoriametrics_arch_map:
+  x86_64: amd64
+  aarch64: arm64
+victoriametrics_arch: "{{ victoriametrics_arch_map[ansible_architecture] | default('amd64') }}"
+
+# 完整下载 URL，可通过变量整体覆盖（例如指向内网镜像）
+victoriametrics_download_url: >-
+  https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v{{ victoriametrics_version }}/victoria-metrics-linux-{{ victoriametrics_arch }}-v{{ victoriametrics_version }}.tar.gz
+
+# vmutils 包（含 vmbackup-prod / vmrestore-prod 等工具），仅当启用相关工具时下载
+victoriametrics_vmutils_download_url: >-
+  https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v{{ victoriametrics_version }}/vmutils-linux-{{ victoriametrics_arch }}-v{{ victoriametrics_version }}.tar.gz
+
+# 对外监听地址（VictoriaMetrics 默认 HTTP 端口 8428）
+victoriametrics_http_listen_address: "0.0.0.0:8428"
+
+# 数据保留期，单位：月（"4"=4 个月）。详见 -retentionPeriod
+victoriametrics_retention_period: "4"
+
+# 数据存储路径，需与备份时的 -storageDataPath 保持一致
+victoriametrics_storage_data_path: "{{ victoriametrics_data_dir }}"
+
+# 自抓取间隔，"0" 表示关闭（避免把 VictoriaMetrics 自身指标写回自己）
+victoriametrics_self_scrape_interval: "0"
+
+# --- 备份相关工具（vmutils：vmbackup-prod / vmrestore-prod）---
+# 设为 true 会额外下载 vmutils 包并安装 vmbackup-prod 与 vmrestore-prod，
+# 以便做定时备份与灾难恢复。cron 定时任务仍由 victoriametrics_backup_enabled 控制。
+victoriametrics_install_vmutils: true
+victoriametrics_vmutils_binaries:
+  - vmbackup-prod
+  - vmrestore-prod
+
+# --- 备份定时任务（默认关闭）---
+# 设为 true 会渲染备份脚本并注册 cron 定时任务（需 vmutils 已安装）
+victoriametrics_backup_enabled: false
+
+# 备份目标，支持 fs:///path、s3://bucket/path、gs://bucket/path、azblob://...
+victoriametrics_backup_dst: "fs:///var/backups/victoriametrics"
+
+# 创建快照的 URL；vmbackup 会自动创建并在备份完成后删除快照，无需停机
+victoriametrics_backup_snapshot_create_url: "http://localhost:8428/snapshot/create"
+
+# 备份脚本、日志与本地目录（仅 fs:// 时需要）
+victoriametrics_backup_script: /usr/local/bin/victoriametrics-backup.sh
+victoriametrics_backup_log_file: /var/log/victoriametrics-backup.log
+victoriametrics_backup_dir: /var/backups/victoriametrics
+
+# cron 调度字段（默认每天 02:00）
+victoriametrics_backup_minute: "0"
+victoriametrics_backup_hour: "2"
+victoriametrics_backup_day: "*"
+victoriametrics_backup_month: "*"
+victoriametrics_backup_weekday: "*"
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

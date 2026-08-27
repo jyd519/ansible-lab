@@ -1,0 +1,45 @@
+---
+
+alertmanager_version: "0.34.0"
+
+alertmanager_install_dir: /usr/share/alertmanager
+alertmanager_data_dir: /var/lib/alertmanager
+alertmanager_config_dir: /etc/alertmanager
+alertmanager_config_file: "{{ alertmanager_config_dir }}/alertmanager.yml"
+alertmanager_web_config_file: "{{ alertmanager_config_dir }}/alertmanager.web.yml"
+
+alertmanager_user: alertmanager
+alertmanager_group: alertmanager
+
+alertmanager_arch_map:
+  x86_64: amd64
+  aarch64: arm64
+alertmanager_arch: "{{ alertmanager_arch_map[ansible_architecture] | default('amd64') }}"
+
+# 完整下载 URL，可通过变量整体覆盖（例如指向内网镜像）
+alertmanager_download_url: >-
+  https://github.com/prometheus/alertmanager/releases/download/v{{ alertmanager_version }}/alertmanager-{{ alertmanager_version }}.linux-{{ alertmanager_arch }}.tar.gz
+
+alertmanager_binaries:
+  - alertmanager
+  - amtool
+
+# 默认对外监听所有网卡（需配合 TLS + BasicAuth 才安全）
+alertmanager_web_listen_address: "0.0.0.0:9093"
+alertmanager_web_external_url: ""
+
+# 单机模式下 Alertmanager 仍默认在 9094 组建集群；设为 "" 可彻底关闭集群
+alertmanager_cluster_listen_address: "0.0.0.0:9094"
+
+# 使用内置模板渲染主配置；如需自定义可指向自己的模板文件
+alertmanager_config_template: alertmanager.yml.j2
+
+# --- Web TLS + BasicAuth ---
+# 设为 true 会渲染 --web.config.file 并启用 HTTPS 与 BasicAuth
+alertmanager_web_config_enabled: false
+alertmanager_tls_cert_file: ""
+alertmanager_tls_key_file: ""
+# 列表，每项形如 "user:$2y$05$..."（bcrypt，由 htpasswd -nbB 生成）
+alertmanager_basic_auth_users: []
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

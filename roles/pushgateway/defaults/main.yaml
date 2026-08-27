@@ -1,0 +1,41 @@
+---
+
+pushgateway_version: "1.11.0"
+
+pushgateway_install_dir: /usr/share/pushgateway
+pushgateway_data_dir: /var/lib/pushgateway
+pushgateway_config_dir: /etc/pushgateway
+pushgateway_web_config_file: "{{ pushgateway_config_dir }}/pushgateway.web.yml"
+
+pushgateway_user: pushgateway
+pushgateway_group: pushgateway
+
+pushgateway_arch_map:
+  x86_64: amd64
+  aarch64: arm64
+pushgateway_arch: "{{ pushgateway_arch_map[ansible_architecture] | default('amd64') }}"
+
+# 完整下载 URL，可通过变量整体覆盖（例如指向内网镜像）
+pushgateway_download_url: >-
+  https://github.com/prometheus/pushgateway/releases/download/v{{ pushgateway_version }}/pushgateway-{{ pushgateway_version }}.linux-{{ pushgateway_arch }}.tar.gz
+
+pushgateway_binaries:
+  - pushgateway
+
+# 默认对外监听所有网卡；一旦对外暴露请启用 --web.config.file (TLS + BasicAuth)
+pushgateway_web_listen_address: "0.0.0.0:9091"
+
+# 持久化：将指标落地到文件，进程重启后不丢失
+pushgateway_persistence_enabled: true
+pushgateway_persistence_file: "{{ pushgateway_data_dir }}/pushgateway.data"
+pushgateway_persistence_interval: 5m
+
+# --- Web TLS + BasicAuth ---
+# 设为 true 会渲染 --web.config.file 并启用 HTTPS 与 BasicAuth
+pushgateway_web_config_enabled: false
+pushgateway_tls_cert_file: ""
+pushgateway_tls_key_file: ""
+# 列表，每项形如 "user:$2y$05$..."（bcrypt，由 htpasswd -nbB 生成）
+pushgateway_basic_auth_users: []
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

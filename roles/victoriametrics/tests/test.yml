@@ -1,0 +1,7 @@
+---
+- hosts: localhost
+  remote_user: root
+  roles:
+    - victoriametrics
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

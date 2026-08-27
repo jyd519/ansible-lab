@@ -1,0 +1,21 @@
+- name: Install Alertmanager
+  hosts: all
+  become: yes
+
+  pre_tasks:
+    - name: Check if '-limit/-l' argument is provided
+      fail:
+        msg: "you must provides the -limit/-l argument to run this playbook"
+      when: ansible_limit is not defined
+
+  roles:
+    - role: alertmanager
+      # alertmanager_version: "0.34.0"
+      # alertmanager_web_listen_address: "0.0.0.0:9093"
+      # alertmanager_web_config_enabled: true
+      # alertmanager_tls_cert_file: /etc/alertmanager/tls.crt
+      # alertmanager_tls_key_file: /etc/alertmanager/tls.key
+      # alertmanager_basic_auth_users:
+      #   - "admin:$2y$05$..."
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

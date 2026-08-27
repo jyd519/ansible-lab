@@ -1,0 +1,16 @@
+{{ ansible_managed | comment }}
+
+{% if pushgateway_tls_cert_file | length > 0 and pushgateway_tls_key_file | length > 0 %}
+tls_server_config:
+  cert_file: {{ pushgateway_tls_cert_file }}
+  key_file: {{ pushgateway_tls_key_file }}
+{% endif %}
+
+{% if pushgateway_basic_auth_users | length > 0 %}
+basic_auth_users:
+{% for u in pushgateway_basic_auth_users %}
+  {{ u }}
+{% endfor %}
+{% endif %}
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

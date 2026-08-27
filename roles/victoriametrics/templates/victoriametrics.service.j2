@@ -1,0 +1,44 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=VictoriaMetrics
+Documentation=https://docs.victoriametrics.com/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ victoriametrics_user }}
+Group={{ victoriametrics_group }}
+ExecStart={{ victoriametrics_install_dir }}/{{ victoriametrics_bin }} \
+  -storageDataPath={{ victoriametrics_storage_data_path }} \
+  -httpListenAddr={{ victoriametrics_http_listen_address }} \
+  -retentionPeriod={{ victoriametrics_retention_period }} \
+  -selfScrapeInterval={{ victoriametrics_self_scrape_interval }} \
+  -loggerLevel=INFO
+Restart=on-failure
+RestartSec=5s
+LimitNOFILE=65536
+TimeoutStartSec=0
+
+# --- 安全沙箱 ---
+ProtectSystem=full
+ProtectHome=true
+NoNewPrivileges=true
+PrivateTmp=true
+ReadWritePaths={{ victoriametrics_data_dir }}
+CapabilityBoundingSet=
+AmbientCapabilities=
+LockPersonality=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

@@ -1,0 +1,19 @@
+{{ ansible_managed | comment }}
+
+global:
+  resolve_timeout: 5m
+
+# 默认路由：单机演示使用空 receiver（告警仅记录日志，不实际投递）。
+# 生产环境请替换为 email / webhook / slack 等真实 receiver，并把含密钥的配置
+# 通过 group_vars / ansible-vault 注入。
+route:
+  receiver: 'null'
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+receivers:
+  - name: 'null'
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

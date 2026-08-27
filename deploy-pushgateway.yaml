@@ -1,0 +1,22 @@
+- name: Install Pushgateway
+  hosts: all
+  become: yes
+
+  pre_tasks:
+    - name: Check if '-limit/-l' argument is provided
+      fail:
+        msg: "you must provides the -limit/-l argument to run this playbook"
+      when: ansible_limit is not defined
+
+  roles:
+    - role: pushgateway
+      # pushgateway_version: "1.11.0"
+      # pushgateway_web_listen_address: "0.0.0.0:9091"
+      # pushgateway_persistence_enabled: true
+      # pushgateway_web_config_enabled: true
+      # pushgateway_tls_cert_file: /etc/pushgateway/tls.crt
+      # pushgateway_tls_key_file: /etc/pushgateway/tls.key
+      # pushgateway_basic_auth_users:
+      #   - "admin:$2y$05$..."
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:

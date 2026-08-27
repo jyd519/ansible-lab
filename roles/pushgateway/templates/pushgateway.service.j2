@@ -1,0 +1,50 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Prometheus Pushgateway
+Documentation=https://github.com/prometheus/pushgateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ pushgateway_user }}
+Group={{ pushgateway_group }}
+ExecStart={{ pushgateway_install_dir }}/pushgateway \
+  --web.listen-address={{ pushgateway_web_listen_address }} \
+{% if pushgateway_persistence_enabled | bool %}
+  --persistence.file={{ pushgateway_persistence_file }} \
+  --persistence.interval={{ pushgateway_persistence_interval }} \
+{% endif %}
+{% if pushgateway_web_config_enabled | bool %}
+  --web.config.file={{ pushgateway_web_config_file }} \
+{% endif %}
+  --log.level=info
+Restart=on-failure
+RestartSec=5s
+LimitNOFILE=65536
+TimeoutStartSec=0
+
+# --- 安全沙箱 ---
+ProtectSystem=full
+ProtectHome=true
+NoNewPrivileges=true
+PrivateTmp=true
+{% if pushgateway_persistence_enabled | bool %}
+ReadWritePaths={{ pushgateway_data_dir }}
+{% endif %}
+CapabilityBoundingSet=
+AmbientCapabilities=
+LockPersonality=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target
+
+# vim:set et sw=2 ts=2 ft=yaml.ansible:
